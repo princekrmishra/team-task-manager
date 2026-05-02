@@ -11,13 +11,25 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET is missing");
+}
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      process.env.FRONTEND_URL
-    ],
-    credentials: true
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        "http://localhost:5173",
+        process.env.FRONTEND_URL,
+      ];
+
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed"));
+      }
+    },
+    credentials: true,
   })
 );
 app.use(express.json());
